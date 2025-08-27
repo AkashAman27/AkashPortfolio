@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '../styles/editor.css';
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 214 32% 91%;
+  --secondary-foreground: 217 91% 35%;
+  --muted: 214 32% 91%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 214 32% 91%;
+  --accent-foreground: 217 91% 35%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 60%;
+  --chart-1: 217 91% 60%;
+  --chart-2: 197 71% 73%;
+  --chart-3: 236 72% 79%;
+  --chart-4: 262 83% 58%;
+  --chart-5: 292 84% 61%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 84% 4.9%;
+  --foreground: 0 0% 98%;
+  --card: 222 84% 4.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 222 84% 4.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 84% 4.9%;
+  --secondary: 217 32% 17.5%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 217 32% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217 32% 17.5%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 217 32% 17.5%;
+  --input: 217 32% 17.5%;
+  --ring: 217 91% 60%;
+  --chart-1: 217 91% 60%;
+  --chart-2: 197 71% 73%;
+  --chart-3: 236 72% 79%;
+  --chart-4: 262 83% 58%;
+  --chart-5: 292 84% 61%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom colors for LLM section - Exact from HTML */
+.bg-slateBg {
+  background-color: #0f0f23;
+}
+
+.bg-cardLight {
+  background-color: #1a1a2e;
+}
+
+.bg-cardDark {
+  background-color: #16213e;
+}
+
+.bg-accent {
+  background-color: #6366f1;
+}
+
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.prose {
+  max-width: none;
+}
+
+.prose pre {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: 0.5rem;
+}
+
+.prose code {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+}
