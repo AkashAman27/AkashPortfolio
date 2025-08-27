@@ -11,10 +11,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Save, ArrowLeft, X, FileText, Type } from 'lucide-react'
+import { AlertCircle, Save, ArrowLeft, X, FileText, Type, Layout } from 'lucide-react'
 import Link from 'next/link'
 import WysiwygEditor from '@/components/editor/wysiwyg-editor'
 import ImageUpload from '@/components/editor/image-upload'
+import SectionEditor, { type ContentSection } from '@/components/editor/section-editor'
 
 interface Tag {
   id: number
@@ -35,8 +36,10 @@ export default function NewPostPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [editorMode, setEditorMode] = useState<'markdown' | 'wysiwyg'>('markdown')
+  const [editorMode, setEditorMode] = useState<'simple' | 'sections'>('simple')
   const [showImageUpload, setShowImageUpload] = useState(false)
+  const [sections, setSections] = useState<ContentSection[]>([])
+  const [simpleEditorType, setSimpleEditorType] = useState<'markdown' | 'wysiwyg'>('markdown')
 
   const supabase = createClient()
 
@@ -74,8 +77,19 @@ export default function NewPostPage() {
   }
 
   const handleSave = async () => {
-    if (!title.trim() || !content.trim()) {
-      setError('Title and content are required')
+    if (!title.trim()) {
+      setError('Title is required')
+      return
+    }
+
+    // Check content based on editor mode
+    if (editorMode === 'simple' && !content.trim()) {
+      setError('Content is required')
+      return
+    }
+
+    if (editorMode === 'sections' && sections.length === 0) {
+      setError('At least one content section is required')
       return
     }
 
@@ -88,8 +102,41 @@ export default function NewPostPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      // Prepare content based on editor mode
+      let finalContent = content
+      let contentSections = null
+
+      if (editorMode === 'sections') {
+        contentSections = sections
+        // Generate markdown representation from sections for search/preview
+        finalContent = sections.map(section => {
+          switch (section.type) {
+            case 'heading':
+              const level = '#'.repeat(section.metadata?.level || 2)
+              return `${level} ${section.content}\n`
+            case 'quote':
+              return `> ${section.content}\n`
+            case 'list':
+              const items = section.content.split('\n').filter(item => item.trim())
+              return items.map((item, index) => 
+                section.metadata?.ordered 
+                  ? `${index + 1}. ${item}` 
+                  : `- ${item}`
+              ).join('\n') + '\n'
+            case 'code':
+              const lang = section.metadata?.language || ''
+              return `\`\`\`${lang}\n${section.content}\n\`\`\`\n`
+            case 'image':
+              const alt = section.metadata?.alt || 'Image'
+              return `![${alt}](${section.content})\n`
+            default:
+              return section.content + '\n'
+          }
+        }).join('\n')
+      }
+
       // Calculate reading time (approximately 200 words per minute)
-      const wordCount = content.split(/\s+/).length
+      const wordCount = finalContent.split(/\s+/).length
       const readingMinutes = Math.max(1, Math.ceil(wordCount / 200))
 
       // Create post
@@ -99,12 +146,14 @@ export default function NewPostPage() {
           title,
           slug,
           excerpt,
-          content_md: content,
+          content_md: finalContent,
+          content_sections: contentSections,
           author_id: user.id,
           status,
           published_at: status === 'published' ? new Date().toISOString() : null,
           reading_minutes: readingMinutes,
-          series: series || null
+          series: series || null,
+          editor_mode: editorMode
         })
         .select()
         .single()
@@ -234,55 +283,93 @@ export default function NewPostPage() {
                   <div className="flex items-center space-x-2">
                     <Button
                       type="button"
-                      variant={editorMode === 'markdown' ? 'default' : 'outline'}
+                      variant={editorMode === 'simple' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setEditorMode('markdown')}
+                      onClick={() => setEditorMode('simple')}
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      Markdown
+                      Simple Editor
                     </Button>
                     <Button
                       type="button"
-                      variant={editorMode === 'wysiwyg' ? 'default' : 'outline'}
+                      variant={editorMode === 'sections' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setEditorMode('wysiwyg')}
+                      onClick={() => setEditorMode('sections')}
                     >
-                      <Type className="mr-2 h-4 w-4" />
-                      WYSIWYG
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowImageUpload(!showImageUpload)}
-                    >
-                      Add Image
+                      <Layout className="mr-2 h-4 w-4" />
+                      Section Editor
                     </Button>
                   </div>
                 </div>
 
-                {editorMode === 'markdown' ? (
-                  <Textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Write your post content in Markdown..."
-                    rows={20}
-                    className="font-mono"
-                  />
-                ) : (
-                  <WysiwygEditor
-                    content={content}
-                    onChange={setContent}
-                    placeholder="Write your post content..."
-                  />
-                )}
+                {editorMode === 'simple' ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        type="button"
+                        variant={simpleEditorType === 'markdown' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSimpleEditorType('markdown')}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Markdown
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={simpleEditorType === 'wysiwyg' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSimpleEditorType('wysiwyg')}
+                      >
+                        <Type className="mr-2 h-4 w-4" />
+                        WYSIWYG
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowImageUpload(!showImageUpload)}
+                      >
+                        Add Image
+                      </Button>
+                    </div>
 
-                {showImageUpload && (
-                  <ImageUpload
-                    onImageSelect={insertImageIntoMarkdown}
-                    className="mt-4"
-                  />
+                    {simpleEditorType === 'markdown' ? (
+                      <Textarea
+                        id="content"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Write your post content in Markdown..."
+                        rows={20}
+                        className="font-mono"
+                      />
+                    ) : (
+                      <WysiwygEditor
+                        content={content}
+                        onChange={setContent}
+                        placeholder="Write your post content..."
+                      />
+                    )}
+
+                    {showImageUpload && (
+                      <ImageUpload
+                        onImageSelect={insertImageIntoMarkdown}
+                        className="mt-4"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="rounded-md border p-4 bg-muted/50">
+                      <h4 className="font-semibold mb-2">Section-Based Editor</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Create your post using different content sections. Each section can be markdown, rich text, images, headings, quotes, lists, or code blocks.
+                      </p>
+                    </div>
+                    <SectionEditor 
+                      sections={sections}
+                      onChange={setSections}
+                    />
+                  </div>
                 )}
               </div>
             </CardContent>
