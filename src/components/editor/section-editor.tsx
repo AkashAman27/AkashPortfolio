@@ -25,9 +25,11 @@ import WysiwygEditor from './wysiwyg-editor'
 import ImageUpload from './image-upload'
 
 export interface ContentSection {
-  id: string
-  type: 'markdown' | 'wysiwyg' | 'image' | 'heading' | 'quote' | 'list' | 'code'
+  id?: number | string // Allow both for new vs existing sections
+  post_id?: number
+  section_type: 'markdown' | 'wysiwyg' | 'image' | 'heading' | 'quote' | 'list' | 'code'
   content: string
+  order_index: number
   metadata?: {
     level?: number // For headings (1-6)
     language?: string // For code blocks
@@ -56,11 +58,12 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
 
   const generateId = () => Math.random().toString(36).substr(2, 9)
 
-  const addSection = (type: ContentSection['type']) => {
+  const addSection = (type: ContentSection['section_type']) => {
     const newSection: ContentSection = {
       id: generateId(),
-      type,
+      section_type: type,
       content: '',
+      order_index: sections.length,
       metadata: type === 'heading' ? { level: 2 } : 
                 type === 'list' ? { ordered: false } :
                 type === 'code' ? { language: 'javascript' } : undefined
@@ -84,7 +87,14 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
     
     if (newIndex >= 0 && newIndex < sections.length) {
       [newSections[index], newSections[newIndex]] = [newSections[newIndex], newSections[index]]
-      onChange(newSections)
+      
+      // Update order_index for all sections
+      const updatedSections = newSections.map((section, idx) => ({
+        ...section,
+        order_index: idx
+      }))
+      
+      onChange(updatedSections)
     }
   }
 
@@ -109,12 +119,18 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
     newSections.splice(draggedIndex, 1)
     newSections.splice(dropIndex, 0, draggedSection)
     
-    onChange(newSections)
+    // Update order_index for all sections
+    const updatedSections = newSections.map((section, idx) => ({
+      ...section,
+      order_index: idx
+    }))
+    
+    onChange(updatedSections)
     setDraggedIndex(null)
   }
 
   const renderSectionContent = (section: ContentSection, index: number) => {
-    switch (section.type) {
+    switch (section.section_type) {
       case 'markdown':
         return (
           <Textarea
@@ -312,7 +328,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
               <div className="flex items-center space-x-2">
                 <Grip className="h-4 w-4 text-muted-foreground cursor-grab" />
                 <CardTitle className="text-sm font-medium">
-                  Section {index + 1}: {SECTION_TYPES.find(t => t.value === section.type)?.label}
+                  Section {index + 1}: {SECTION_TYPES.find(t => t.value === section.section_type)?.label}
                 </CardTitle>
               </div>
               <div className="flex items-center space-x-1">

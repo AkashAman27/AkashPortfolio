@@ -104,13 +104,11 @@ export default function NewPostPage() {
 
       // Prepare content based on editor mode
       let finalContent = content
-      let contentSections = null
 
       if (editorMode === 'sections') {
-        contentSections = sections
         // Generate markdown representation from sections for search/preview
         finalContent = sections.map(section => {
-          switch (section.type) {
+          switch (section.section_type) {
             case 'heading':
               const level = '#'.repeat(section.metadata?.level || 2)
               return `${level} ${section.content}\n`
@@ -147,18 +145,33 @@ export default function NewPostPage() {
           slug,
           excerpt,
           content_md: finalContent,
-          content_sections: contentSections,
           author_id: user.id,
           status,
           published_at: status === 'published' ? new Date().toISOString() : null,
           reading_minutes: readingMinutes,
-          series: series || null,
-          editor_mode: editorMode
+          series: series || null
         })
         .select()
         .single()
 
       if (postError) throw postError
+
+      // If using sections, save them to content_sections table
+      if (editorMode === 'sections' && sections.length > 0) {
+        const sectionsToInsert = sections.map(section => ({
+          post_id: post.id,
+          section_type: section.section_type,
+          content: section.content,
+          order_index: section.order_index,
+          metadata: section.metadata
+        }))
+
+        const { error: sectionsError } = await supabase
+          .from('content_sections')
+          .insert(sectionsToInsert)
+
+        if (sectionsError) throw sectionsError
+      }
 
       // Add tags
       if (selectedTags.length > 0) {

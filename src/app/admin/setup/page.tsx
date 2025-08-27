@@ -115,6 +115,96 @@ export default function SetupPage() {
     }
   }
 
+  const handleCreateSamplePost = async () => {
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError('Please sign in first')
+        return
+      }
+
+      // Create a sample post
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .insert({
+          title: 'Welcome to My Blog - Built with Section Editor',
+          slug: 'welcome-section-editor-demo',
+          excerpt: 'This post demonstrates the new section-based editor with different content types including markdown, headings, images, code blocks, and more.',
+          content_md: '# Welcome to My Blog\n\nThis is a demo post created with the section editor...',
+          author_id: user.id,
+          status: 'published',
+          published_at: new Date().toISOString(),
+          reading_minutes: 3
+        })
+        .select()
+        .single()
+
+      if (postError) throw postError
+
+      // Create sample sections
+      const sampleSections = [
+        {
+          post_id: post.id,
+          section_type: 'heading',
+          content: 'Welcome to My Blog',
+          order_index: 0,
+          metadata: { level: 1 }
+        },
+        {
+          post_id: post.id,
+          section_type: 'markdown',
+          content: 'This post demonstrates the **powerful section-based editor** that allows you to mix different types of content in a single post. Each section can be a different content type!',
+          order_index: 1,
+          metadata: {}
+        },
+        {
+          post_id: post.id,
+          section_type: 'quote',
+          content: 'The best way to learn is by doing, and the best way to do is by building something meaningful.',
+          order_index: 2,
+          metadata: {}
+        },
+        {
+          post_id: post.id,
+          section_type: 'heading',
+          content: 'Features of the Section Editor',
+          order_index: 3,
+          metadata: { level: 2 }
+        },
+        {
+          post_id: post.id,
+          section_type: 'list',
+          content: 'Multiple content types (Markdown, WYSIWYG, Images, etc.)\nDrag and drop reordering\nDatabase-backed storage\nReal-time preview\nEasy section management',
+          order_index: 4,
+          metadata: { ordered: false }
+        },
+        {
+          post_id: post.id,
+          section_type: 'code',
+          content: 'function createPost() {\n  return {\n    title: "My New Post",\n    sections: [\n      { type: "heading", content: "Hello World" },\n      { type: "markdown", content: "This is **awesome**!" }\n    ]\n  }\n}',
+          order_index: 5,
+          metadata: { language: 'javascript' }
+        }
+      ]
+
+      const { error: sectionsError } = await supabase
+        .from('content_sections')
+        .insert(sampleSections)
+
+      if (sectionsError) throw sectionsError
+
+      setMessage('Sample post created successfully! Check the admin panel to see it.')
+    } catch (err: any) {
+      setError('Failed to create sample post: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -188,6 +278,15 @@ export default function SetupPage() {
               className="w-full"
             >
               {loading ? 'Checking...' : 'Check Database'}
+            </Button>
+
+            <Button 
+              onClick={handleCreateSamplePost} 
+              disabled={loading}
+              variant="secondary"
+              className="w-full"
+            >
+              {loading ? 'Creating...' : 'Create Sample Post'}
             </Button>
           </div>
 
