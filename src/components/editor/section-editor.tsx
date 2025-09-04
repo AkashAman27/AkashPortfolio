@@ -21,7 +21,7 @@ import {
   Code,
   Grip
 } from 'lucide-react'
-import WysiwygEditor from './wysiwyg-editor'
+// import WysiwygEditor from './wysiwyg-editor'
 import ImageUpload from './image-upload'
 
 export interface ContentSection {
@@ -135,7 +135,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
         return (
           <Textarea
             value={section.content}
-            onChange={(e) => updateSection(section.id, { content: e.target.value })}
+            onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
             placeholder="Write in Markdown..."
             rows={10}
             className="font-mono resize-none"
@@ -144,11 +144,9 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
 
       case 'wysiwyg':
         return (
-          <WysiwygEditor
-            content={section.content}
-            onChange={(content) => updateSection(section.id, { content })}
-            placeholder="Write with the rich text editor..."
-          />
+          <div className="p-4 text-center text-muted-foreground bg-muted/50 rounded">
+            WYSIWYG Editor temporarily disabled. Use Markdown section instead.
+          </div>
         )
 
       case 'heading':
@@ -159,7 +157,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
               <Select
                 value={String(section.metadata?.level || 2)}
                 onValueChange={(value) => 
-                  updateSection(section.id, { 
+                  updateSection(String(section.id!), { 
                     metadata: { ...section.metadata, level: parseInt(value) }
                   })
                 }
@@ -176,7 +174,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
             </div>
             <Input
               value={section.content}
-              onChange={(e) => updateSection(section.id, { content: e.target.value })}
+              onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
               placeholder="Heading text..."
               className={`font-semibold ${
                 section.metadata?.level === 1 ? 'text-3xl' :
@@ -192,7 +190,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
         return (
           <Textarea
             value={section.content}
-            onChange={(e) => updateSection(section.id, { content: e.target.value })}
+            onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
             placeholder="Quote text..."
             rows={4}
             className="italic border-l-4 border-primary pl-4"
@@ -210,7 +208,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
                   variant={!section.metadata?.ordered ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => 
-                    updateSection(section.id, { 
+                    updateSection(String(section.id!), { 
                       metadata: { ...section.metadata, ordered: false }
                     })
                   }
@@ -222,7 +220,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
                   variant={section.metadata?.ordered ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => 
-                    updateSection(section.id, { 
+                    updateSection(String(section.id!), { 
                       metadata: { ...section.metadata, ordered: true }
                     })
                   }
@@ -233,7 +231,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
             </div>
             <Textarea
               value={section.content}
-              onChange={(e) => updateSection(section.id, { content: e.target.value })}
+              onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
               placeholder="Enter list items (one per line)..."
               rows={6}
             />
@@ -249,7 +247,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
                 id={`code-lang-${section.id}`}
                 value={section.metadata?.language || ''}
                 onChange={(e) => 
-                  updateSection(section.id, { 
+                  updateSection(String(section.id!), { 
                     metadata: { ...section.metadata, language: e.target.value }
                   })
                 }
@@ -259,7 +257,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
             </div>
             <Textarea
               value={section.content}
-              onChange={(e) => updateSection(section.id, { content: e.target.value })}
+              onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
               placeholder="Enter code..."
               rows={10}
               className="font-mono text-sm"
@@ -273,7 +271,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
             <Input
               value={section.metadata?.alt || ''}
               onChange={(e) => 
-                updateSection(section.id, { 
+                updateSection(String(section.id!), { 
                   metadata: { ...section.metadata, alt: e.target.value }
                 })
               }
@@ -288,14 +286,14 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
                 />
                 <Input
                   value={section.content}
-                  onChange={(e) => updateSection(section.id, { content: e.target.value })}
+                  onChange={(e) => updateSection(String(section.id!), { content: e.target.value })}
                   placeholder="Image URL"
                 />
               </div>
             ) : (
               <ImageUpload
                 onImageSelect={(url, alt) => {
-                  updateSection(section.id, { 
+                  updateSection(String(section.id!), { 
                     content: url,
                     metadata: { ...section.metadata, alt: alt || section.metadata?.alt }
                   })
@@ -354,7 +352,7 @@ export default function SectionEditor({ sections, onChange }: SectionEditorProps
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeSection(section.id)}
+                  onClick={() => removeSection(String(section.id!))}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />

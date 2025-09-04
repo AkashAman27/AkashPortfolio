@@ -6,6 +6,10 @@ import { ArrowRight, Github, Linkedin, Mail, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import HeroCanvas from '@/components/three/hero-canvas'
 import LLMEmpowermentSection from '@/components/llm-empowerment-section'
+import AnimatedHeroText from '@/components/animated-hero-text'
+import AnimatedSubtitle from '@/components/animated-subtitle'
+import AnimatedProjectCards from '@/components/animated-project-cards'
+import AnimatedBlogCards from '@/components/animated-blog-cards'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -35,16 +39,12 @@ export default async function HomePage() {
         <section className="py-20 md:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-                  Hi, I&apos;m{' '}
-                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
-                    Akash
-                  </span>
-                </h1>
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-md">
-                  Full Stack Developer & AI Enthusiast building innovative digital solutions
-                </p>
+              <div className="space-y-6">
+                <AnimatedHeroText />
+                <AnimatedSubtitle 
+                  text="Full Stack Developer & AI Enthusiast building innovative digital solutions"
+                  className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-lg"
+                />
               </div>
               
               <div className="flex flex-wrap gap-4">
@@ -80,6 +80,7 @@ export default async function HomePage() {
           </div>
         </section>
 
+
         {/* LLM Empowerment Section */}
         <LLMEmpowermentSection />
 
@@ -93,9 +94,9 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatedProjectCards className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Project 1 - AI-Powered RAG System */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-purple-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-purple-500/30 transition-all group">
                 <div className="bg-purple-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-purple-500/20 transition-all">
                   <svg className="h-6 w-6 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -108,7 +109,7 @@ export default async function HomePage() {
               </div>
 
               {/* Project 2 - LLM Fine-tuning Platform */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-blue-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-blue-500/30 transition-all group">
                 <div className="bg-blue-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-all">
                   <svg className="h-6 w-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -121,7 +122,7 @@ export default async function HomePage() {
               </div>
 
               {/* Project 3 - AI Code Assistant */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-emerald-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-emerald-500/30 transition-all group">
                 <div className="bg-emerald-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-emerald-500/20 transition-all">
                   <svg className="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -134,7 +135,7 @@ export default async function HomePage() {
               </div>
 
               {/* Project 4 - Neural Document Processing */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-amber-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-amber-500/30 transition-all group">
                 <div className="bg-amber-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-amber-500/20 transition-all">
                   <svg className="h-6 w-6 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -147,7 +148,7 @@ export default async function HomePage() {
               </div>
 
               {/* Project 5 - Conversational AI Framework */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-pink-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-pink-500/30 transition-all group">
                 <div className="bg-pink-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-pink-500/20 transition-all">
                   <svg className="h-6 w-6 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -160,7 +161,7 @@ export default async function HomePage() {
               </div>
 
               {/* Project 6 - ML Model Deployment Pipeline */}
-              <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-cyan-500/30 transition-all group">
+              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-cyan-500/30 transition-all group">
                 <div className="bg-cyan-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-cyan-500/20 transition-all">
                   <svg className="h-6 w-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
@@ -171,7 +172,7 @@ export default async function HomePage() {
                   Automated MLOps pipeline for model training, validation, deployment, and monitoring with A/B testing and performance analytics.
                 </p>
               </div>
-            </div>
+            </AnimatedProjectCards>
 
             <div className="mt-16 text-center">
               <Button variant="outline" size="lg" asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-light border-none hover:opacity-90">
@@ -194,7 +195,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatedBlogCards className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {(latestPosts || []).map((post, index) => {
                 const colors = [
                   { bg: 'bg-purple-500/10', hover: 'hover:border-purple-500/30', icon: 'text-purple-400', glow: 'group-hover:bg-purple-500/20' },
@@ -242,7 +243,7 @@ export default async function HomePage() {
 
                 return (
                   <Link href={`/blog/${post.slug}`} key={post.id}>
-                    <div className={`bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 ${color.hover} transition-all group cursor-pointer`}>
+                    <div className={`blog-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 ${color.hover} transition-all group cursor-pointer`}>
                       <div className={`${color.bg} rounded-lg w-12 h-12 flex items-center justify-center mb-6 ${color.glow} transition-all`}>
                         {icons[index]}
                       </div>
@@ -264,7 +265,7 @@ export default async function HomePage() {
                   </Link>
                 );
               })}
-            </div>
+            </AnimatedBlogCards>
 
             <div className="mt-16 text-center">
               <Button variant="outline" size="lg" asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-light border-none hover:opacity-90">
@@ -284,7 +285,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-light text-white mb-2">Akash</h3>
+              <h3 className="text-xl font-light text-white mb-2">Akash Aman</h3>
               <p className="text-gray-400 text-sm max-w-md">
                 Building the future with AI, one intelligent solution at a time.
               </p>
@@ -305,7 +306,7 @@ export default async function HomePage() {
           
           <div className="border-t border-gray-800 mt-8 pt-6 text-center">
             <p className="text-gray-500 text-sm">
-              &copy; 2024 Akash. Built with Next.js, Supabase, and AI.
+              &copy; 2024 Akash Aman. Built with Next.js, Supabase, and AI.
             </p>
           </div>
         </div>

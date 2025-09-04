@@ -1,0 +1,213 @@
+/* Professional code block styling inspired by Supabase, Vercel, and modern docs */
+
+/* Pre code blocks */
+.prose pre {
+  @apply relative overflow-x-auto rounded-lg border border-border bg-slate-950 dark:bg-slate-900;
+  @apply my-8 p-0;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.prose pre code {
+  @apply block overflow-x-auto p-6 text-sm font-mono leading-relaxed;
+  @apply text-slate-50 dark:text-slate-100;
+  @apply bg-transparent;
+  font-family: 'Fira Code', 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', monospace;
+}
+
+/* Inline code */
+.prose :not(pre) > code {
+  @apply relative rounded bg-slate-100 dark:bg-slate-800;
+  @apply px-1.5 py-0.5 text-sm font-mono;
+  @apply text-slate-900 dark:text-slate-100;
+  @apply before:content-none after:content-none;
+  font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', monospace;
+}
+
+/* Language label for code blocks */
+.prose pre[data-language]::before {
+  content: attr(data-language);
+  @apply absolute top-3 right-4 text-xs font-medium;
+  @apply text-slate-400 dark:text-slate-500;
+  @apply uppercase tracking-wide;
+}
+
+/* Copy button area */
+.prose pre {
+  @apply relative;
+}
+
+.prose pre:hover::after {
+  content: '';
+  @apply absolute top-3 right-3 w-6 h-6;
+  @apply bg-slate-700 hover:bg-slate-600 rounded;
+  @apply cursor-pointer opacity-80 hover:opacity-100;
+  background-image: url("data:image/svg+xml,%3csvg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 4v12a2 2 0 002 2h8a2 2 0 002-2V7.242a2 2 0 00-.602-1.43L16.083 2.57A2 2 0 0014.685 2H10a2 2 0 00-2 2z' stroke='white' stroke-width='1.5'/%3e%3cpath d='M16 18v2a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h2' stroke='white' stroke-width='1.5'/%3e%3c/svg%3e");
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Syntax highlighting improvements */
+.prose pre code .token.comment,
+.prose pre code .token.prolog,
+.prose pre code .token.doctype,
+.prose pre code .token.cdata {
+  @apply text-slate-500 dark:text-slate-400;
+}
+
+.prose pre code .token.punctuation {
+  @apply text-slate-300 dark:text-slate-300;
+}
+
+.prose pre code .token.property,
+.prose pre code .token.tag,
+.prose pre code .token.boolean,
+.prose pre code .token.number,
+.prose pre code .token.constant,
+.prose pre code .token.symbol,
+.prose pre code .token.deleted {
+  @apply text-red-400;
+}
+
+.prose pre code .token.selector,
+.prose pre code .token.attr-name,
+.prose pre code .token.string,
+.prose pre code .token.char,
+.prose pre code .token.builtin,
+.prose pre code .token.inserted {
+  @apply text-green-400;
+}
+
+.prose pre code .token.operator,
+.prose pre code .token.entity,
+.prose pre code .token.url,
+.prose pre code .token.variable {
+  @apply text-yellow-300;
+}
+
+.prose pre code .token.atrule,
+.prose pre code .token.attr-value,
+.prose pre code .token.function,
+.prose pre code .token.class-name {
+  @apply text-blue-400;
+}
+
+.prose pre code .token.keyword {
+  @apply text-purple-400;
+}
+
+.prose pre code .token.regex,
+.prose pre code .token.important {
+  @apply text-orange-400;
+}
+
+/* Line highlighting */
+.prose pre code .line {
+  @apply block;
+}
+
+.prose pre code .line.highlighted {
+  @apply bg-slate-700/50 -mx-6 px-6;
+}
+
+/* Line numbers */
+.prose pre code .line-numbers {
+  @apply absolute left-0 top-6 bottom-6 w-12 text-right;
+  @apply text-slate-500 dark:text-slate-600;
+  @apply select-none pointer-events-none;
+  @apply border-r border-slate-700;
+  @apply pr-4 text-sm leading-relaxed;
+}
+
+/* Better scrollbars */
+.prose pre code::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.prose pre code::-webkit-scrollbar-track {
+  @apply bg-slate-800;
+}
+
+.prose pre code::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded;
+}
+
+.prose pre code::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+
+/* Section spacing improvements */
+.prose h2 + h3 {
+  @apply mt-6;
+}
+
+.prose h3 + h4 {
+  @apply mt-4;
+}
+
+.prose p + h2,
+.prose p + h3,
+.prose p + h4 {
+  @apply mt-8;
+}
+
+.prose pre + p,
+.prose pre + h2,
+.prose pre + h3,
+.prose pre + h4 {
+  @apply mt-8;
+}
+
+.prose p + pre {
+  @apply mt-6;
+}
+
+/* Environment variables styling */
+.prose pre code .token.env {
+  @apply text-cyan-400;
+}
+
+/* SQL specific styling */
+.prose pre[data-language="sql"] code .token.keyword {
+  @apply text-purple-300 font-semibold;
+}
+
+.prose pre[data-language="sql"] code .token.operator {
+  @apply text-pink-300;
+}
+
+/* JavaScript/TypeScript specific */
+.prose pre[data-language="javascript"] code .token.keyword,
+.prose pre[data-language="typescript"] code .token.keyword,
+.prose pre[data-language="jsx"] code .token.keyword,
+.prose pre[data-language="tsx"] code .token.keyword {
+  @apply text-purple-300;
+}
+
+.prose pre[data-language="javascript"] code .token.function,
+.prose pre[data-language="typescript"] code .token.function,
+.prose pre[data-language="jsx"] code .token.function,
+.prose pre[data-language="tsx"] code .token.function {
+  @apply text-blue-300;
+}
+
+/* Python specific */
+.prose pre[data-language="python"] code .token.keyword {
+  @apply text-orange-300;
+}
+
+.prose pre[data-language="python"] code .token.string {
+  @apply text-green-300;
+}
+
+/* Bash/Shell specific */
+.prose pre[data-language="bash"] code,
+.prose pre[data-language="shell"] code {
+  @apply text-green-300;
+}
+
+.prose pre[data-language="bash"] code .token.operator,
+.prose pre[data-language="shell"] code .token.operator {
+  @apply text-yellow-300;
+}

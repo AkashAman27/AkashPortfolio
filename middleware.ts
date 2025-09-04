@@ -98,6 +98,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*'
+    // Temporarily disable middleware for admin routes
+    // '/admin/:path*'
   ]
 }

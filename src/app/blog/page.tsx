@@ -7,8 +7,8 @@ import { CalendarIcon, ClockIcon, UserIcon } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export const metadata = {
-  title: 'Blog - Akash Portfolio',
-  description: 'Read articles about web development, AI, machine learning, and technology trends.',
+  title: 'Blog - Akash Aman',
+  description: 'Read articles about web development, AI, machine learning, and technology trends by Akash Aman.',
 }
 
 export default async function BlogPage() {

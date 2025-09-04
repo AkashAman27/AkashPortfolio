@@ -1,9 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -20,7 +27,7 @@ export default function Navigation() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Akash
+            Akash Aman
           </Link>
 
           {/* Desktop Navigation */}

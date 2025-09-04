@@ -54,7 +54,7 @@ export default async function ViewPostPage({ params }: { params: Promise<{ id: s
     `)
     .eq('post_id', resolvedParams.id)
 
-  const tags = postTags?.map(pt => pt.tags).filter(Boolean) as Tag[] || []
+  const tags = postTags?.map(pt => pt.tags).filter(Boolean).flat() as Tag[] || []
 
   const getStatusBadge = (status: string) => {
     const variants = {

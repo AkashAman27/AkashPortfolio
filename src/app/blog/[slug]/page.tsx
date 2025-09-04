@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { CalendarIcon, ClockIcon, UserIcon, ArrowLeft } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { renderMarkdown } from '@/lib/mdx'
+import BlogContent from '@/components/blog-content'
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   }
 
   return {
-    title: `${post.title} - Akash Portfolio`,
+    title: `${post.title} - Akash Aman`,
     description: post.excerpt,
   }
 }
@@ -127,10 +128,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
           
           <div className="border-t border-border pt-8">
-            <div 
-              className="prose prose-lg dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
+            <BlogContent content={htmlContent} />
           </div>
         </article>
         

@@ -203,7 +203,7 @@ export default async function ViewProjectPage({ params }: { params: Promise<{ id
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {project.tech_stack.map(tech => (
+                  {project.tech_stack.map((tech: string) => (
                     <Badge key={tech} variant="outline">
                       {tech}
                     </Badge>

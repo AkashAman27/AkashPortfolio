@@ -16,11 +16,34 @@ export async function renderMarkdown(markdown: string): Promise<string> {
     .use(rehypeKatex)
     .use(rehypePrettyCode, {
       theme: {
-        dark: 'github-dark',
+        dark: 'github-dark-dimmed',
         light: 'github-light',
       },
       keepBackground: false,
       defaultLang: 'plaintext',
+      onVisitLine(node: any) {
+        // Prevent lines with no content from collapsing
+        if (node.children.length === 0) {
+          node.children = [{ type: 'text', value: ' ' }]
+        }
+      },
+      onVisitHighlightedLine(node: any) {
+        node.properties.className = ['line', 'highlighted']
+      },
+      onVisitHighlightedChars(node: any) {
+        node.properties.className = ['word', 'highlighted']
+      },
+      transformers: [
+        {
+          name: 'add-language-label',
+          pre(node) {
+            const lang = this.options.lang || 'plaintext'
+            if (lang && lang !== 'plaintext') {
+              node.properties['data-language'] = lang
+            }
+          }
+        }
+      ]
     })
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(markdown)

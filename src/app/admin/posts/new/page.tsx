@@ -13,9 +13,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Save, ArrowLeft, X, FileText, Type, Layout } from 'lucide-react'
 import Link from 'next/link'
-import WysiwygEditor from '@/components/editor/wysiwyg-editor'
+// import WysiwygEditor from '@/components/editor/wysiwyg-editor'
 import ImageUpload from '@/components/editor/image-upload'
 import SectionEditor, { type ContentSection } from '@/components/editor/section-editor'
+import AdminWrapper from '@/components/auth/admin-wrapper'
 
 interface Tag {
   id: number
@@ -209,14 +210,14 @@ export default function NewPostPage() {
   }
 
   const insertImageIntoMarkdown = (url: string, alt?: string) => {
-    if (editorMode === 'markdown') {
+    if (editorMode === 'simple') {
       const imageMarkdown = `![${alt || 'Image'}](${url})\n\n`
       setContent(prev => prev + imageMarkdown)
     }
     setShowImageUpload(false)
   }
 
-  return (
+  const PostCreationContent = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -356,11 +357,9 @@ export default function NewPostPage() {
                         className="font-mono"
                       />
                     ) : (
-                      <WysiwygEditor
-                        content={content}
-                        onChange={setContent}
-                        placeholder="Write your post content..."
-                      />
+                      <div className="text-center p-8 text-muted-foreground">
+                        WYSIWYG Editor temporarily disabled for testing. Use Markdown editor instead.
+                      </div>
                     )}
 
                     {showImageUpload && (
@@ -467,5 +466,11 @@ export default function NewPostPage() {
         </div>
       </div>
     </div>
+  )
+
+  return (
+    <AdminWrapper>
+      <PostCreationContent />
+    </AdminWrapper>
   )
 }

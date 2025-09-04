@@ -1,17 +1,18 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import '../styles/code-blocks.css'
 import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Akash Portfolio - Full Stack Developer & AI Enthusiast',
-  description: 'Portfolio of Akash - Full Stack Developer specializing in modern web technologies, AI/ML, and innovative digital solutions.',
+  title: 'Akash Aman - Full Stack Developer & AI Enthusiast',
+  description: 'Portfolio of Akash Aman - Full Stack Developer specializing in modern web technologies, AI/ML, and innovative digital solutions.',
   keywords: ['Full Stack Developer', 'React', 'Next.js', 'TypeScript', 'AI', 'Machine Learning', 'Web Development'],
-  authors: [{ name: 'Akash' }],
-  creator: 'Akash',
-  publisher: 'Akash',
+  authors: [{ name: 'Akash Aman' }],
+  creator: 'Akash Aman',
+  publisher: 'Akash Aman',
   formatDetection: {
     email: false,
     address: false,
@@ -19,10 +20,10 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://akash-portfolio.vercel.app'),
   openGraph: {
-    title: 'Akash Portfolio - Full Stack Developer & AI Enthusiast',
-    description: 'Portfolio of Akash - Full Stack Developer specializing in modern web technologies, AI/ML, and innovative digital solutions.',
+    title: 'Akash Aman - Full Stack Developer & AI Enthusiast',
+    description: 'Portfolio of Akash Aman - Full Stack Developer specializing in modern web technologies, AI/ML, and innovative digital solutions.',
     url: 'https://akash-portfolio.vercel.app',
-    siteName: 'Akash Portfolio',
+    siteName: 'Akash Aman Portfolio',
     locale: 'en_US',
     type: 'website',
   },
