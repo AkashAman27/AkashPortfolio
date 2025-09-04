@@ -11,9 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Save, Eye, ArrowLeft, X, FileText, Type } from 'lucide-react'
+import { AlertCircle, Save, ArrowLeft, X } from 'lucide-react'
 import Link from 'next/link'
-import WysiwygEditor from '@/components/editor/wysiwyg-editor'
 import ImageUpload from '@/components/editor/image-upload'
 
 interface Post {
@@ -22,6 +21,7 @@ interface Post {
   slug: string
   excerpt: string
   content_md: string
+  content_html: string | null
   status: 'draft' | 'published' | 'scheduled'
   published_at: string | null
   reading_minutes: number | null
@@ -44,7 +44,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null)
-  const [editorMode, setEditorMode] = useState<'markdown' | 'wysiwyg'>('markdown')
+  // Markdown-only editor
   const [showImageUpload, setShowImageUpload] = useState(false)
 
   const supabase = createClient()
@@ -105,6 +105,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     }
   }
 
+  // Markdown-only editor; no mode switching
+
   const handleSave = async () => {
     if (!post) return
 
@@ -114,7 +116,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
     try {
       // Calculate reading time (approximately 200 words per minute)
-      const wordCount = post.content_md.split(/\s+/).length
+      const sourceText = (post.content_md || '')
+      const wordCount = sourceText.trim().split(/\s+/).filter(Boolean).length
       const readingMinutes = Math.max(1, Math.ceil(wordCount / 200))
 
       // Update post
@@ -124,7 +127,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           title: post.title,
           slug: post.slug,
           excerpt: post.excerpt,
-          content_md: post.content_md,
+          content_md: post.content_md || '',
+          // Clear HTML to ensure site renders Markdown updates
+          content_html: null,
           status: post.status,
           published_at: post.status === 'published' && !post.published_at 
             ? new Date().toISOString() 
@@ -175,13 +180,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   }
 
   const insertImageIntoMarkdown = (url: string, alt?: string) => {
-    if (post && editorMode === 'markdown') {
-      const imageMarkdown = `![${alt || 'Image'}](${url})\n\n`
-      setPost(prev => prev ? {
-        ...prev, 
-        content_md: prev.content_md + imageMarkdown
-      } : null)
-    }
+    if (!post) return
+    const imageMarkdown = `![${alt || 'Image'}](${url})\n\n`
+    setPost(prev => prev ? {
+      ...prev, 
+      content_md: (prev.content_md || '') + imageMarkdown
+    } : null)
     setShowImageUpload(false)
   }
 
@@ -229,8 +233,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" asChild>
-            <Link href={`/blog/${post.slug}`} target="_blank">
-              <Eye className="mr-2 h-4 w-4" />
+            <Link href={`/admin/posts/${post.id}/preview`} target="_blank">
               Preview
             </Link>
           </Button>
@@ -294,26 +297,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="content">Content</Label>
+                  <Label htmlFor="content" className="font-medium">Content (Markdown)</Label>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      type="button"
-                      variant={editorMode === 'markdown' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setEditorMode('markdown')}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Markdown
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={editorMode === 'wysiwyg' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setEditorMode('wysiwyg')}
-                    >
-                      <Type className="mr-2 h-4 w-4" />
-                      WYSIWYG
-                    </Button>
                     <Button
                       type="button"
                       variant="outline"
@@ -325,22 +310,14 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   </div>
                 </div>
 
-                {editorMode === 'markdown' ? (
-                  <Textarea
-                    id="content"
-                    value={post.content_md}
-                    onChange={(e) => setPost(prev => prev ? {...prev, content_md: e.target.value} : null)}
-                    placeholder="Write your post content in Markdown..."
-                    rows={20}
-                    className="font-mono"
-                  />
-                ) : (
-                  <WysiwygEditor
-                    content={post.content_md}
-                    onChange={(content) => setPost(prev => prev ? {...prev, content_md: content} : null)}
-                    placeholder="Write your post content..."
-                  />
-                )}
+                <Textarea
+                  id="content"
+                  value={post.content_md}
+                  onChange={(e) => setPost(prev => prev ? {...prev, content_md: e.target.value} : null)}
+                  placeholder="Write your post content in Markdown..."
+                  rows={20}
+                  className="font-mono"
+                />
 
                 {showImageUpload && (
                   <ImageUpload

@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Plus, Edit, Eye, Github, ExternalLink } from 'lucide-react'
+import { Plus, Edit, Eye, Github, ExternalLink, Star, Trash2 } from 'lucide-react'
+import ConfirmButton from '@/components/admin/confirm-button'
 
 interface Project {
   id: number
@@ -27,6 +29,23 @@ export default async function ProjectsPage() {
   
   if (error) {
     console.error('Error fetching projects:', error)
+  }
+
+  async function toggleFeatured(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const current = formData.get('featured') === 'true'
+    const supabase = await createClient()
+    await supabase.from('projects').update({ featured: !current }).eq('id', id)
+    revalidatePath('/admin/projects')
+  }
+
+  async function deleteProject(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const supabase = await createClient()
+    await supabase.from('projects').delete().eq('id', id)
+    revalidatePath('/admin/projects')
   }
 
   return (
@@ -105,6 +124,17 @@ export default async function ProjectsPage() {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
+                    <form action={toggleFeatured}>
+                      <input type="hidden" name="id" value={String(project.id)} />
+                      <input type="hidden" name="featured" value={String(!!project.featured)} />
+                      <Button size="sm" variant={project.featured ? 'secondary' : 'outline'} type="submit">
+                        <Star className="h-4 w-4 mr-1" />
+                        {project.featured ? 'Unfeature' : 'Feature'}
+                      </Button>
+                    </form>
+                    <ConfirmButton action={deleteProject} fields={{ id: String(project.id) }}>
+                      <Trash2 className="h-4 w-4" />
+                    </ConfirmButton>
                   </div>
                 </div>
               </CardHeader>

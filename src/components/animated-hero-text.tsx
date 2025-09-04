@@ -41,7 +41,7 @@ export default function AnimatedHeroText({ className }: AnimatedHeroTextProps) {
     const imLetters = imRef.current ? splitTextIntoLetters(imRef.current) : []
     const akashLetters = akashRef.current ? splitTextIntoLetters(akashRef.current) : []
 
-    // Create the staggered animation
+    // Create the staggered animation (original)
     tl.to([...hiLetters, ...imLetters], {
       y: 0,
       opacity: 1,
@@ -55,7 +55,7 @@ export default function AnimatedHeroText({ className }: AnimatedHeroTextProps) {
       duration: 0.8,
       ease: 'back.out(1.7)',
       stagger: 0.08,
-    }, '-=0.3') // Start slightly before the previous animation ends
+    }, '-=0.3')
 
     // Cleanup function
     return () => {

@@ -10,6 +10,8 @@ import AnimatedHeroText from '@/components/animated-hero-text'
 import AnimatedSubtitle from '@/components/animated-subtitle'
 import AnimatedProjectCards from '@/components/animated-project-cards'
 import AnimatedBlogCards from '@/components/animated-blog-cards'
+import AnimatedSectionHeader from '@/components/animated-section-header'
+import SmoothScrollLink from '@/components/smooth-scroll-link'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -20,13 +22,14 @@ export default async function HomePage() {
     .select('*')
     .eq('featured', true)
     .order('order_index', { ascending: true })
-    .limit(2)
+    .limit(6)
 
-  // Fetch latest blog posts
-  const { data: latestPosts } = await supabase
+  // Fetch featured blog posts
+  const { data: featuredPosts } = await supabase
     .from('posts')
     .select('id, title, excerpt, published_at, slug')
     .eq('status', 'published')
+    .eq('featured', true)
     .order('published_at', { ascending: false })
     .limit(6)
 
@@ -42,7 +45,7 @@ export default async function HomePage() {
               <div className="space-y-6">
                 <AnimatedHeroText />
                 <AnimatedSubtitle 
-                  text="Full Stack Developer & AI Enthusiast building innovative digital solutions"
+                  text="AI Enthusiast building innovative digital solutions"
                   className="text-xl md:text-2xl lg:text-3xl text-muted-foreground max-w-lg"
                 />
               </div>
@@ -50,14 +53,14 @@ export default async function HomePage() {
               <div className="flex flex-wrap gap-4">
                 <Button size="lg" asChild>
                   <Link href="/projects">
-                    View My Work
+                    View My Projects
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href="/blog">
+                  <SmoothScrollLink href="#blog-section" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-10 px-8">
                     Read My Blog
-                  </Link>
+                  </SmoothScrollLink>
                 </Button>
               </div>
 
@@ -87,91 +90,60 @@ export default async function HomePage() {
         {/* Featured Projects */}
         <section className="py-20 bg-black">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-white">Featured Projects</h2>
-              <p className="text-gray-400 max-w-2xl mx-auto font-extralight leading-relaxed">
-                Cutting-edge AI and machine learning projects showcasing expertise in LLMs, RAG systems, and intelligent automation
-              </p>
-            </div>
+            <AnimatedSectionHeader
+              title="Featured Projects"
+              subtitle="Cutting-edge AI and machine learning projects showcasing expertise in LLMs, RAG systems, and intelligent automation"
+            />
 
             <AnimatedProjectCards className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Project 1 - AI-Powered RAG System */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-purple-500/30 transition-all group">
-                <div className="bg-purple-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-purple-500/20 transition-all">
-                  <svg className="h-6 w-6 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {(featuredProjects || []).map((project, index) => {
+                const colors = [
+                  { bg: 'bg-purple-500/10', hover: 'hover:border-purple-500/30', icon: 'text-purple-400', glow: 'group-hover:bg-purple-500/20' },
+                  { bg: 'bg-blue-500/10', hover: 'hover:border-blue-500/30', icon: 'text-blue-400', glow: 'group-hover:bg-blue-500/20' },
+                  { bg: 'bg-emerald-500/10', hover: 'hover:border-emerald-500/30', icon: 'text-emerald-400', glow: 'group-hover:bg-emerald-500/20' },
+                  { bg: 'bg-amber-500/10', hover: 'hover:border-amber-500/30', icon: 'text-amber-400', glow: 'group-hover:bg-amber-500/20' },
+                  { bg: 'bg-pink-500/10', hover: 'hover:border-pink-500/30', icon: 'text-pink-400', glow: 'group-hover:bg-pink-500/20' },
+                  { bg: 'bg-cyan-500/10', hover: 'hover:border-cyan-500/30', icon: 'text-cyan-400', glow: 'group-hover:bg-cyan-500/20' }
+                ];
+                const color = colors[index % colors.length];
+
+                const icons = [
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="database">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">Intelligent RAG System</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Advanced retrieval-augmented generation system using vector embeddings, semantic search, and fine-tuned language models for enterprise knowledge management.
-                </p>
-              </div>
-
-              {/* Project 2 - LLM Fine-tuning Platform */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-blue-500/30 transition-all group">
-                <div className="bg-blue-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-all">
-                  <svg className="h-6 w-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  </svg>,
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="zap">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">LLM Fine-tuning Platform</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Scalable platform for fine-tuning large language models with custom datasets, LoRA adapters, and distributed training capabilities.
-                </p>
-              </div>
-
-              {/* Project 3 - AI Code Assistant */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-emerald-500/30 transition-all group">
-                <div className="bg-emerald-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-emerald-500/20 transition-all">
-                  <svg className="h-6 w-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  </svg>,
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="code">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">AI Code Assistant</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Intelligent coding companion powered by transformer models, providing context-aware code completion, bug detection, and optimization suggestions.
-                </p>
-              </div>
-
-              {/* Project 4 - Neural Document Processing */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-amber-500/30 transition-all group">
-                <div className="bg-amber-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-amber-500/20 transition-all">
-                  <svg className="h-6 w-6 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  </svg>,
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="file">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">Neural Document Processing</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Multi-modal AI system for intelligent document analysis, extraction, and summarization using computer vision and NLP techniques.
-                </p>
-              </div>
-
-              {/* Project 5 - Conversational AI Framework */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-pink-500/30 transition-all group">
-                <div className="bg-pink-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-pink-500/20 transition-all">
-                  <svg className="h-6 w-6 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  </svg>,
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="message">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">Conversational AI Framework</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Production-ready framework for building sophisticated chatbots with memory, context awareness, and multi-turn conversation capabilities.
-                </p>
-              </div>
-
-              {/* Project 6 - ML Model Deployment Pipeline */}
-              <div className="project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 hover:border-cyan-500/30 transition-all group">
-                <div className="bg-cyan-500/10 rounded-lg w-12 h-12 flex items-center justify-center mb-6 group-hover:bg-cyan-500/20 transition-all">
-                  <svg className="h-6 w-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  </svg>,
+                  <svg className={`h-6 w-6 ${color.icon}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" key="beaker">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                   </svg>
-                </div>
-                <h3 className="text-xl font-light mb-3 text-white">ML Model Deployment Pipeline</h3>
-                <p className="text-gray-400 font-extralight leading-relaxed">
-                  Automated MLOps pipeline for model training, validation, deployment, and monitoring with A/B testing and performance analytics.
-                </p>
-              </div>
+                ];
+
+                return (
+                  <Link href={`/projects/${project.slug}`} key={project.id}>
+                    <div className={`project-card bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-800 ${color.hover} transition-all group cursor-pointer`}>
+                      <div className={`${color.bg} rounded-lg w-12 h-12 flex items-center justify-center mb-6 ${color.glow} transition-all`}>
+                        {icons[index]}
+                      </div>
+                      <h3 className="text-2xl font-light mb-3 text-white group-hover:text-gray-100 transition-colors">
+                        {project.name}
+                      </h3>
+                      <p className="text-gray-300 font-extralight leading-relaxed text-base">
+                        {project.summary}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </AnimatedProjectCards>
 
             <div className="mt-16 text-center">
@@ -186,17 +158,15 @@ export default async function HomePage() {
         </section>
 
         {/* Featured Blog Posts */}
-        <section className="py-20 bg-gray-950">
+        <section id="blog-section" className="py-20 bg-gray-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-white">Featured Blog Posts</h2>
-              <p className="text-gray-400 max-w-2xl mx-auto font-extralight leading-relaxed">
-                Deep dives into artificial intelligence, machine learning, and the future of intelligent systems
-              </p>
-            </div>
+            <AnimatedSectionHeader
+              title="Featured Blog Posts"
+              subtitle="Deep dives into artificial intelligence, machine learning, and the future of intelligent systems"
+            />
 
             <AnimatedBlogCards className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(latestPosts || []).map((post, index) => {
+              {(featuredPosts || []).map((post, index) => {
                 const colors = [
                   { bg: 'bg-purple-500/10', hover: 'hover:border-purple-500/30', icon: 'text-purple-400', glow: 'group-hover:bg-purple-500/20' },
                   { bg: 'bg-blue-500/10', hover: 'hover:border-blue-500/30', icon: 'text-blue-400', glow: 'group-hover:bg-blue-500/20' },
@@ -282,32 +252,137 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="bg-black border-t border-gray-800 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-light text-white mb-2">Akash Aman</h3>
-              <p className="text-gray-400 text-sm max-w-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Brand Section */}
+            <div className="md:col-span-1">
+              <h3 className="text-xl font-light text-white mb-4">Akash Aman</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
                 Building the future with AI, one intelligent solution at a time.
               </p>
+              <div className="flex items-center space-x-4">
+                <Link href="https://github.com" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  <Github className="h-5 w-5" />
+                </Link>
+                <Link href="https://linkedin.com" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  <Linkedin className="h-5 w-5" />
+                </Link>
+                <Link href="mailto:contact@example.com" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  <Mail className="h-5 w-5" />
+                </Link>
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-6">
-              <Link href="https://github.com" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="h-5 w-5" />
-              </Link>
-              <Link href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </Link>
-              <Link href="mailto:contact@example.com" className="text-gray-400 hover:text-white transition-colors">
-                <Mail className="h-5 w-5" />
-              </Link>
+
+            {/* Navigation Links */}
+            <div>
+              <h4 className="text-white font-medium mb-4">Navigation</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/projects" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Projects
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <SmoothScrollLink href="#blog-section" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Featured Posts
+                  </SmoothScrollLink>
+                </li>
+              </ul>
+            </div>
+
+            {/* AI/ML Categories */}
+            <div>
+              <h4 className="text-white font-medium mb-4">AI & ML Topics</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/blog?category=rag" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    RAG Systems
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog?category=fine-tuning" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Fine-tuning
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog?category=llm" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Large Language Models
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog?category=ml-ops" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    MLOps
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blog?category=computer-vision" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Computer Vision
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Project Categories */}
+            <div>
+              <h4 className="text-white font-medium mb-4">Project Types</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/projects?category=ai" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    AI Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/projects?category=automation" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Automation Tools
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/projects?category=web" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Web Development
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/projects?category=open-source" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Open Source
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/projects?category=enterprise" className="text-gray-400 hover:text-white transition-colors text-sm">
+                    Enterprise Solutions
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-6 text-center">
-            <p className="text-gray-500 text-sm">
-              &copy; 2024 Akash Aman. Built with Next.js, Supabase, and AI.
-            </p>
+          {/* Bottom Border & Copyright */}
+          <div className="border-t border-gray-800 mt-12 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className="text-gray-500 text-sm">
+                &copy; 2025 Akash Aman. Built for knowledge sharing and innovation in AI and machine learning.
+              </p>
+              <div className="flex items-center space-x-6 text-sm">
+                <Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-gray-500 hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+                <Link href="/sitemap" className="text-gray-500 hover:text-white transition-colors">
+                  Sitemap
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

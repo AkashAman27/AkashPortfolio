@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Plus, Edit, Eye, Trash2 } from 'lucide-react'
+import ConfirmButton from '@/components/admin/confirm-button'
 
 interface Post {
   id: number
@@ -14,6 +16,7 @@ interface Post {
   published_at: string | null
   created_at: string
   reading_minutes: number | null
+  featured?: boolean
 }
 
 export default async function PostsPage({
@@ -31,7 +34,7 @@ export default async function PostsPage({
   // Build query
   let query = supabase
     .from('posts')
-    .select('id, title, slug, excerpt, status, published_at, created_at, reading_minutes')
+    .select('id, title, slug, excerpt, status, published_at, created_at, reading_minutes, featured')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
   
@@ -43,6 +46,41 @@ export default async function PostsPage({
   
   if (error) {
     console.error('Error fetching posts:', error)
+  }
+
+  async function publishPost(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const supabase = await createClient()
+    await supabase.from('posts').update({ status: 'published', published_at: new Date().toISOString() }).eq('id', id)
+    revalidatePath('/admin/posts')
+  }
+
+  async function unpublishPost(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const supabase = await createClient()
+    await supabase.from('posts').update({ status: 'draft', published_at: null }).eq('id', id)
+    revalidatePath('/admin/posts')
+  }
+
+  async function toggleFeatured(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const current = formData.get('featured') === 'true'
+    const supabase = await createClient()
+    await supabase.from('posts').update({ featured: !current }).eq('id', id)
+    revalidatePath('/admin/posts')
+  }
+
+  async function deletePost(formData: FormData) {
+    'use server'
+    const id = Number(formData.get('id'))
+    const supabase = await createClient()
+    // Delete tag relations first to avoid FK issues
+    await supabase.from('post_tags').delete().eq('post_id', id)
+    await supabase.from('posts').delete().eq('id', id)
+    revalidatePath('/admin/posts')
   }
 
   const getStatusBadge = (status: string) => {
@@ -116,14 +154,19 @@ export default async function PostsPage({
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
-                    <CardTitle className="line-clamp-1">
-                      <Link 
-                        href={`/admin/posts/${post.id}`}
-                        className="hover:text-purple-400 transition-colors"
-                      >
-                        {post.title}
-                      </Link>
-                    </CardTitle>
+                    <div className="flex items-center space-x-2">
+                      <CardTitle className="line-clamp-1">
+                        <Link 
+                          href={`/admin/posts/${post.id}`}
+                          className="hover:text-purple-400 transition-colors"
+                        >
+                          {post.title}
+                        </Link>
+                      </CardTitle>
+                      {post.featured && (
+                        <Badge variant="default">Featured</Badge>
+                      )}
+                    </div>
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(post.status)}
                       <span className="text-sm text-muted-foreground">
@@ -138,10 +181,31 @@ export default async function PostsPage({
                       </Link>
                     </Button>
                     <Button size="sm" variant="outline" asChild>
+                      <Link href={`/admin/posts/${post.id}/preview`} target="_blank">
+                        Preview
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
                       <Link href={`/admin/posts/${post.id}/edit`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
+                    <form action={post.status === 'published' ? unpublishPost : publishPost}>
+                      <input type="hidden" name="id" value={String(post.id)} />
+                      <Button size="sm" variant={post.status === 'published' ? 'secondary' : 'default'} type="submit">
+                        {post.status === 'published' ? 'Unpublish' : 'Publish'}
+                      </Button>
+                    </form>
+                    <form action={toggleFeatured}>
+                      <input type="hidden" name="id" value={String(post.id)} />
+                      <input type="hidden" name="featured" value={String(!!post.featured)} />
+                      <Button size="sm" variant={post.featured ? 'secondary' : 'outline'} type="submit">
+                        {post.featured ? 'Unfeature' : 'Feature'}
+                      </Button>
+                    </form>
+                    <ConfirmButton action={deletePost} fields={{ id: String(post.id) }}>
+                      <Trash2 className="h-4 w-4" />
+                    </ConfirmButton>
                   </div>
                 </div>
               </CardHeader>

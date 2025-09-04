@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -11,18 +11,56 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Save, ArrowLeft, X, FileText, Type, Layout } from 'lucide-react'
+import { AlertCircle, Save, ArrowLeft, X, FileText } from 'lucide-react'
 import Link from 'next/link'
-// import WysiwygEditor from '@/components/editor/wysiwyg-editor'
 import ImageUpload from '@/components/editor/image-upload'
-import SectionEditor, { type ContentSection } from '@/components/editor/section-editor'
-import AdminWrapper from '@/components/auth/admin-wrapper'
 
 interface Tag {
   id: number
   slug: string
   name: string
 }
+
+// Memoized tag selector to avoid rerendering while typing in content
+const TagSelector = memo(function TagSelector({
+  tags,
+  selectedTags,
+  toggleTag,
+}: {
+  tags: Tag[]
+  selectedTags: number[]
+  toggleTag: (tagId: number) => void
+}) {
+  return (
+    <div className="space-y-3">
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.map((tagId) => {
+            const tag = tags.find((t) => t.id === tagId)
+            return tag ? (
+              <Badge key={tagId} variant="default" className="flex items-center gap-1">
+                {tag.name}
+                <button onClick={() => toggleTag(tagId)} className="ml-1 hover:bg-white/20 rounded-full p-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ) : null
+          })}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {tags
+          .filter((tag) => !selectedTags.includes(tag.id))
+          .map((tag) => (
+            <Badge key={tag.id} variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => toggleTag(tag.id)}>
+              {tag.name}
+            </Badge>
+          ))}
+      </div>
+    </div>
+  )
+})
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -37,10 +75,7 @@ export default function NewPostPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [editorMode, setEditorMode] = useState<'simple' | 'sections'>('simple')
   const [showImageUpload, setShowImageUpload] = useState(false)
-  const [sections, setSections] = useState<ContentSection[]>([])
-  const [simpleEditorType, setSimpleEditorType] = useState<'markdown' | 'wysiwyg'>('markdown')
 
   const supabase = createClient()
 
@@ -60,22 +95,27 @@ export default function NewPostPage() {
     }
   }
 
-  // Auto-generate slug from title
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle)
-    if (!slug || slug === generateSlug(title)) {
-      setSlug(generateSlug(newTitle))
-    }
-  }
-
-  const generateSlug = (text: string) => {
+  const generateSlug = useCallback((text: string) => {
     return text
       .toLowerCase()
       .replace(/[^a-z0-9 -]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim()
-  }
+  }, [])
+
+  // Auto-generate slug from title with debounce
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle)
+    // Only auto-generate slug if it's empty or was auto-generated from previous title
+    setSlug(prevSlug => {
+      const currentTitleSlug = generateSlug(title)
+      if (!prevSlug.trim() || prevSlug === currentTitleSlug) {
+        return generateSlug(newTitle)
+      }
+      return prevSlug
+    })
+  }, [title, generateSlug])
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -83,14 +123,9 @@ export default function NewPostPage() {
       return
     }
 
-    // Check content based on editor mode
-    if (editorMode === 'simple' && !content.trim()) {
+    // Require content
+    if (!content.trim()) {
       setError('Content is required')
-      return
-    }
-
-    if (editorMode === 'sections' && sections.length === 0) {
-      setError('At least one content section is required')
       return
     }
 
@@ -103,39 +138,11 @@ export default function NewPostPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      // Prepare content based on editor mode
-      let finalContent = content
-
-      if (editorMode === 'sections') {
-        // Generate markdown representation from sections for search/preview
-        finalContent = sections.map(section => {
-          switch (section.section_type) {
-            case 'heading':
-              const level = '#'.repeat(section.metadata?.level || 2)
-              return `${level} ${section.content}\n`
-            case 'quote':
-              return `> ${section.content}\n`
-            case 'list':
-              const items = section.content.split('\n').filter(item => item.trim())
-              return items.map((item, index) => 
-                section.metadata?.ordered 
-                  ? `${index + 1}. ${item}` 
-                  : `- ${item}`
-              ).join('\n') + '\n'
-            case 'code':
-              const lang = section.metadata?.language || ''
-              return `\`\`\`${lang}\n${section.content}\n\`\`\`\n`
-            case 'image':
-              const alt = section.metadata?.alt || 'Image'
-              return `![${alt}](${section.content})\n`
-            default:
-              return section.content + '\n'
-          }
-        }).join('\n')
-      }
+      // Content is pure Markdown
+      const finalContent = content
 
       // Calculate reading time (approximately 200 words per minute)
-      const wordCount = finalContent.split(/\s+/).length
+      const wordCount = finalContent.trim().split(/\s+/).filter(Boolean).length
       const readingMinutes = Math.max(1, Math.ceil(wordCount / 200))
 
       // Create post
@@ -145,7 +152,8 @@ export default function NewPostPage() {
           title,
           slug,
           excerpt,
-          content_md: finalContent,
+          content_md: finalContent || '',
+          content_html: null,
           author_id: user.id,
           status,
           published_at: status === 'published' ? new Date().toISOString() : null,
@@ -156,23 +164,6 @@ export default function NewPostPage() {
         .single()
 
       if (postError) throw postError
-
-      // If using sections, save them to content_sections table
-      if (editorMode === 'sections' && sections.length > 0) {
-        const sectionsToInsert = sections.map(section => ({
-          post_id: post.id,
-          section_type: section.section_type,
-          content: section.content,
-          order_index: section.order_index,
-          metadata: section.metadata
-        }))
-
-        const { error: sectionsError } = await supabase
-          .from('content_sections')
-          .insert(sectionsToInsert)
-
-        if (sectionsError) throw sectionsError
-      }
 
       // Add tags
       if (selectedTags.length > 0) {
@@ -201,23 +192,23 @@ export default function NewPostPage() {
     }
   }
 
-  const toggleTag = (tagId: number) => {
+  const toggleTag = useCallback((tagId: number) => {
     setSelectedTags(prev => 
       prev.includes(tagId) 
         ? prev.filter(id => id !== tagId)
         : [...prev, tagId]
     )
-  }
+  }, [])
 
-  const insertImageIntoMarkdown = (url: string, alt?: string) => {
-    if (editorMode === 'simple') {
-      const imageMarkdown = `![${alt || 'Image'}](${url})\n\n`
-      setContent(prev => prev + imageMarkdown)
-    }
+  const insertImageIntoMarkdown = useCallback((url: string, alt?: string) => {
+    const imageMarkdown = `![${alt || 'Image'}](${url})\n\n`
+    setContent(prev => prev + imageMarkdown)
     setShowImageUpload(false)
-  }
+  }, [])
 
-  const PostCreationContent = () => (
+  // Avoid defining React components inside components as it causes remounts on every render.
+  // Return JSX directly to keep subtree stable during typing.
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -293,95 +284,36 @@ export default function NewPostPage() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="content">Content</Label>
+                  <Label htmlFor="content" className="font-medium">Content (Markdown)</Label>
                   <div className="flex items-center space-x-2">
                     <Button
                       type="button"
-                      variant={editorMode === 'simple' ? 'default' : 'outline'}
+                      variant="outline"
                       size="sm"
-                      onClick={() => setEditorMode('simple')}
+                      onClick={() => setShowImageUpload(!showImageUpload)}
                     >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Simple Editor
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={editorMode === 'sections' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setEditorMode('sections')}
-                    >
-                      <Layout className="mr-2 h-4 w-4" />
-                      Section Editor
+                      Add Image
                     </Button>
                   </div>
                 </div>
 
-                {editorMode === 'simple' ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        type="button"
-                        variant={simpleEditorType === 'markdown' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSimpleEditorType('markdown')}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Markdown
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={simpleEditorType === 'wysiwyg' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSimpleEditorType('wysiwyg')}
-                      >
-                        <Type className="mr-2 h-4 w-4" />
-                        WYSIWYG
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowImageUpload(!showImageUpload)}
-                      >
-                        Add Image
-                      </Button>
-                    </div>
+                <div className="space-y-2">
+                  <Textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write your post content in Markdown..."
+                    rows={20}
+                    className="font-mono resize-y"
+                    spellCheck={false}
+                  />
+                </div>
 
-                    {simpleEditorType === 'markdown' ? (
-                      <Textarea
-                        id="content"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Write your post content in Markdown..."
-                        rows={20}
-                        className="font-mono"
-                      />
-                    ) : (
-                      <div className="text-center p-8 text-muted-foreground">
-                        WYSIWYG Editor temporarily disabled for testing. Use Markdown editor instead.
-                      </div>
-                    )}
-
-                    {showImageUpload && (
-                      <ImageUpload
-                        onImageSelect={insertImageIntoMarkdown}
-                        className="mt-4"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-md border p-4 bg-muted/50">
-                      <h4 className="font-semibold mb-2">Section-Based Editor</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Create your post using different content sections. Each section can be markdown, rich text, images, headings, quotes, lists, or code blocks.
-                      </p>
-                    </div>
-                    <SectionEditor 
-                      sections={sections}
-                      onChange={setSections}
-                    />
-                  </div>
+                {showImageUpload && (
+                  <ImageUpload
+                    onImageSelect={insertImageIntoMarkdown}
+                    className="mt-4"
+                  />
                 )}
               </div>
             </CardContent>
@@ -428,49 +360,11 @@ export default function NewPostPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {selectedTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTags.map(tagId => {
-                      const tag = tags.find(t => t.id === tagId)
-                      return tag ? (
-                        <Badge key={tagId} variant="default" className="flex items-center gap-1">
-                          {tag.name}
-                          <button
-                            onClick={() => toggleTag(tagId)}
-                            className="ml-1 hover:bg-white/20 rounded-full p-0.5"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ) : null
-                    })}
-                  </div>
-                )}
-                
-                <div className="flex flex-wrap gap-2">
-                  {tags.filter(tag => !selectedTags.includes(tag.id)).map(tag => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-muted"
-                      onClick={() => toggleTag(tag.id)}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              <TagSelector tags={tags} selectedTags={selectedTags} toggleTag={toggleTag} />
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
-
-  return (
-    <AdminWrapper>
-      <PostCreationContent />
-    </AdminWrapper>
   )
 }

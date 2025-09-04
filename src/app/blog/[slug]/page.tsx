@@ -93,7 +93,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <UserIcon className="h-4 w-4" />
-                  {post.profiles?.username || 'Anonymous'}
+                  Akash Aman
                 </div>
                 
                 {post.published_at && (
@@ -127,7 +127,23 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </header>
           </div>
           
-          <div className="border-t border-border pt-8">
+          {/* Content Separator */}
+          <div className="relative my-12">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gradient-to-r from-transparent via-border to-transparent"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <div className="bg-background px-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-purple-500 rounded-full animate-pulse delay-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg prose-invert max-w-none">
             <BlogContent content={htmlContent} />
           </div>
         </article>

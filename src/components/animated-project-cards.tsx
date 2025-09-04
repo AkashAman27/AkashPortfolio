@@ -27,48 +27,68 @@ export default function AnimatedProjectCards({ children, className }: AnimatedPr
       transition: 'none'
     })
 
-    // Set initial state - cards invisible and translated down
+    // Set initial state - cards invisible and translated down with rotation
     gsap.set(cards, {
-      y: 40,
+      y: 60,
       opacity: 0,
+      rotationX: 15,
+      scale: 0.9,
       force3D: true
     })
 
-    // Create scroll-triggered animation with immediate responsiveness
-    // First row (cards 0, 1, 2)
+    // Create scroll-triggered animation with enhanced effects
+    // First row (cards 0, 1, 2) with parallax-like effect
     gsap.to(Array.from(cards).slice(0, 3), {
       y: 0,
       opacity: 1,
-      duration: 0.4,
-      ease: 'power1.out',
-      stagger: 0.08,
+      rotationX: 0,
+      scale: 1,
+      duration: 0.8,
+      ease: 'power2.out',
+      stagger: 0.12,
       force3D: true,
       scrollTrigger: {
         trigger: containerRef.current,
-        start: 'top 90%',
+        start: 'top 85%',
         end: 'bottom 20%',
         toggleActions: 'play none none reverse'
       }
     })
 
-    // Second row (cards 3, 4, 5) - minimal delay
+    // Second row (cards 3, 4, 5) with slight delay and different entrance
     if (cards.length > 3) {
       gsap.to(Array.from(cards).slice(3, 6), {
         y: 0,
         opacity: 1,
-        duration: 0.4,
-        ease: 'power1.out',
-        stagger: 0.08,
-        delay: 0.1,
+        rotationX: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: 'power2.out',
+        stagger: 0.12,
+        delay: 0.15,
         force3D: true,
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 90%',
+          start: 'top 85%',
           end: 'bottom 20%',
           toggleActions: 'play none none reverse'
         }
       })
     }
+
+    // Add subtle parallax effect to each card during scroll
+    cards.forEach((card, index) => {
+      gsap.to(card, {
+        y: -20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1,
+        }
+      })
+    })
 
     // Re-enable CSS transitions for hover effects after initial animation
     setTimeout(() => {

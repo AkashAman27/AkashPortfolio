@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Navigation from '@/components/navigation'
 import { Github, ExternalLink, Star } from 'lucide-react'
+import AutoSuggest from '@/components/search/auto-suggest'
 
 export const metadata = {
   title: 'Projects - Akash Portfolio',
@@ -43,6 +44,10 @@ export default async function ProjectsPage() {
             </p>
           </header>
 
+          <div className="max-w-3xl mx-auto mb-10">
+            <AutoSuggest mode="projects" placeholder="Search projects by name or summary…" />
+          </div>
+
           {/* Featured Projects */}
           {featuredProjects.length > 0 && (
             <section className="mb-16">
@@ -51,12 +56,12 @@ export default async function ProjectsPage() {
                 <h2 className="text-2xl font-semibold">Featured Projects</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
                 {featuredProjects.map((project) => (
-                  <Card key={project.id} className="group hover:shadow-lg transition-all duration-300">
-                    <CardHeader>
+                  <Card key={project.id} className="group hover:shadow-lg transition-all duration-300 h-full min-h-[320px]">
+                    <CardHeader className="p-6 pb-4">
                       <div className="flex items-start justify-between">
-                        <CardTitle className="group-hover:text-purple-400 transition-colors">
+                        <CardTitle className="group-hover:text-purple-400 transition-colors text-2xl">
                           <Link href={`/projects/${project.slug}`}>
                             {project.name}
                           </Link>
@@ -75,12 +80,12 @@ export default async function ProjectsPage() {
                         </div>
                       </div>
                       {project.summary && (
-                        <CardDescription>{project.summary}</CardDescription>
+                        <CardDescription className="text-base" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{project.summary}</CardDescription>
                       )}
                     </CardHeader>
                     
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                    <CardContent className="px-6 pb-6 pt-0">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {project.tech_stack?.map((tech: string) => (
                           <Badge key={tech} variant="secondary" className="text-xs">
                             {tech}
@@ -101,12 +106,12 @@ export default async function ProjectsPage() {
                 {featuredProjects.length > 0 ? 'More Projects' : 'All Projects'}
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
                 {otherProjects.map((project) => (
-                  <Card key={project.id} className="group hover:shadow-lg transition-all duration-300">
-                    <CardHeader>
+                  <Card key={project.id} className="group hover:shadow-lg transition-all duration-300 h-full min-h-[320px]">
+                    <CardHeader className="p-6 pb-4">
                       <div className="flex items-start justify-between">
-                        <CardTitle className="group-hover:text-purple-400 transition-colors">
+                        <CardTitle className="group-hover:text-purple-400 transition-colors text-2xl">
                           <Link href={`/projects/${project.slug}`}>
                             {project.name}
                           </Link>
@@ -125,12 +130,12 @@ export default async function ProjectsPage() {
                         </div>
                       </div>
                       {project.summary && (
-                        <CardDescription>{project.summary}</CardDescription>
+                        <CardDescription className="text-base" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{project.summary}</CardDescription>
                       )}
                     </CardHeader>
                     
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                    <CardContent className="px-6 pb-6 pt-0">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {project.tech_stack?.map((tech: string) => (
                           <Badge key={tech} variant="secondary" className="text-xs">
                             {tech}

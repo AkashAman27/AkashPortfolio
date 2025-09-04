@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '../styles/editor.css';
 
 :root {
   --background: 0 0% 100%;
@@ -67,6 +66,21 @@ body {
   color: hsl(var(--foreground));
   background: hsl(var(--background));
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Link colors and hover state */
+a {
+  transition: color 150ms ease;
+}
+
+/* Default deep-blue hover for links (does not affect buttons which set their own colors) */
+a:hover {
+  color: #1e3a8a; /* deep blue */
+}
+
+/* Ensure rich content links also use deep blue on hover */
+.prose a:hover {
+  color: #1e3a8a !important;
 }
 
 /* Custom colors for LLM section - Exact from HTML */

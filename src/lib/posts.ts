@@ -1,5 +1,19 @@
 import { createClient } from '@/lib/supabase/client'
-import type { ContentSection } from '@/components/editor/section-editor'
+
+// Local copy of ContentSection type (section editor removed)
+export interface ContentSection {
+  id?: number | string
+  post_id?: number
+  section_type: 'markdown' | 'wysiwyg' | 'image' | 'heading' | 'quote' | 'list' | 'code'
+  content: string
+  order_index: number
+  metadata?: {
+    level?: number
+    language?: string
+    alt?: string
+    ordered?: boolean
+  }
+}
 
 export interface Post {
   id: number
