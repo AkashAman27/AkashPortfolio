@@ -1,5 +1,5 @@
 import React from 'react'
-import type { ContentSection } from '@/components/editor/section-editor'
+import type { ContentSection } from '@/lib/posts'
 
 interface PostRendererProps {
   sections: ContentSection[]
